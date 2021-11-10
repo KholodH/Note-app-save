@@ -1,29 +1,33 @@
 package com.example.noteappsave
 
-import android.content.ContentValues
-import android.content.Context
-import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteOpenHelper
+import android.app.Application
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import android.widget.Toast
 
-class DatabaseHelper(context: Context): SQLiteOpenHelper(context,"details.db", null, 1) {
-   // private val sqLiteDatabase: SQLiteDatabase = writableDatabase
+class MainActivity : AppCompatActivity() {
+    var note = ""
+    private lateinit var db: DatabaseHelper
+    lateinit var btn:Button
+    lateinit var tvadd:EditText
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+         btn= findViewById(R.id.button)
+         tvadd= findViewById(R.id.editText)
+        db = DatabaseHelper(this)
+        btn.setOnClickListener {
+            postNote()
+        }
 
-    override fun onCreate(db: SQLiteDatabase?) {
-        db?.execSQL("create table notes (pk INTEGER PRIMARY KEY AUTOINCREMENT,noteid int,note text)")
+
     }
-    override fun onUpgrade(db: SQLiteDatabase?, p1: Int, p2: Int) {
-        db!!.execSQL("DROP TABLE IF EXISTS notes")  // This removes the table if a new version is detected
-        onCreate(db)
+    private fun postNote(){
+        db.saveData(NoteModel(0, tvadd.text.toString()))
+        tvadd.text.clear()
+        Toast.makeText(this, "Note Added", Toast.LENGTH_LONG).show()
     }
-
-    fun saveData(note: NoteModel): Long {
-        val db = this.writableDatabase
-        val contentValues = ContentValues()
-        // There is no need to pass in the pk because it is automatically generated
-        contentValues.put("note",note.noteText)
-       val nt= db.insert("notes", null, contentValues)
-        db.close()
-        return nt
-    }
-
 }
